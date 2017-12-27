@@ -16,19 +16,16 @@ MSAC can compress and decompress both FASTA files with aligned protein sequences
 
 `msac <mode> [options] <in_file> <out_file>`
 
-`Parameters:`
+Parameters:
 
-`   mode       - Fc (Fasta compress), Fd (Fasta decompress), Sc (Stockholm compress), Sd (Stockholm decompress)`
+* `mode       - Fc (Fasta compress), Fd (Fasta decompress), Sc (Stockholm compress), Sd (Stockholm decompress)`
+* `in_file    - name of input file`
+* `out_file   - name of output file`
 
-`   in_file    - name of input file`
+Options:
+* `-w <width> - wrap sequences in FASTA file to given length (only for Fd mode); default: 0 (no wrapping)`
 
-`   out_file   - name of output file`
-
-`Options:`
-
-`   -w <width> - wrap sequences in FASTA file to given length (only for Fd mode); default: 0 (no wrapping)`
-
-`   -f         - turn on fast variant (MTF in place of WFC)`
+* `-f         - turn on fast variant (MTF in place of WFC)`
 
   
 Examples:
