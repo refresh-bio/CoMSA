@@ -15,13 +15,21 @@ MSAC can compress and decompress both FASTA files with aligned protein sequences
 ### Usage
 
 `msac <mode> [options] <in_file> <out_file>`
+
 `Parameters:`
+
 `   mode       - Fc (Fasta compress), Fd (Fasta decompress), Sc (Stockholm compress), Sd (Stockholm decompress)`
+
 `   in_file    - name of input file`
+
 `   out_file   - name of output file`
+
 `Options:`
+
 `   -w <width> - wrap sequences in FASTA file to given length (only for Fd mode); default: 0 (no wrapping)`
+
 `   -f         - turn on fast variant (MTF in place of WFC)`
+
   
 Examples:
 
@@ -44,7 +52,7 @@ Decompresses `pf00005.26.fasta` file and wrap the protein data to 60 columns.
 
 ## Citing
 
-[Deorowicz, S., Walczyszyn, J., Debudaj-Grabysz, A., Gudyú, A., Grabowski, S. (2017) MSAC: Compression of multiple sequence alignment files, bioRxiv]() 
+[Deorowicz, S., Walczyszyn, J., Debudaj-Grabysz, A., Gudy≈ì, A., Grabowski, S. (2017) MSAC: Compression of multiple sequence alignment files, bioRxiv]() 
 DOI:
 
 
