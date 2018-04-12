@@ -1,11 +1,11 @@
 #pragma once
 // *******************************************************************************************
-// This file is a part of MSAC software distributed under GNU GPL 3 licence.
-// The homepage of the MSAC project is http://sun.aei.polsl.pl/msac
+// This file is a part of CoMSA software distributed under GNU GPL 3 licence.
+// The homepage of the CoMSA project is http://sun.aei.polsl.pl/REFRESH/CoMSA
 //
-// Author: Sebastian Deorowicz
-// Version: 1.0
-// Date   : 2017-12-27
+// Author : Sebastian Deorowicz
+// Version: 1.1
+// Date   : 2018-04-12
 // *******************************************************************************************
 
 #include <string>
@@ -35,6 +35,11 @@ class CMSACompress
 	vector<uint8_t> v_text_compressed;
 	size_t v_text_pos;
 
+	// Just for debug purposes
+	stage_mode_t PBWT_fwd_mode, PBWT_rev_mode;
+	stage_mode_t SS_fwd_mode, SS_rev_mode;
+	stage_mode_t RLE0_fwd_mode, RLE0_rev_mode;
+
 	size_t pre_entropy_sequences_size;
 	bool fast_variant;
 
@@ -61,6 +66,10 @@ class CMSACompress
 public:
 	CMSACompress();
 	~CMSACompress();
+
+#ifdef EXPERIMENTAL_MODE
+	void SetCopyModes(bool PBWT_mode, bool SS_mode, bool RLE0_mode);
+#endif
 
 	bool Compress(vector<string> &v_names, vector<string> &v_sequences, vector<uint8_t> &compressed_data, 
 		size_t &comp_text_size, size_t &comp_seq_size, bool _fast_variant);

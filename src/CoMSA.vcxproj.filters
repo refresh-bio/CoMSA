@@ -34,7 +34,7 @@
     <ClCompile Include="mtf.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MSAC.cpp">
+    <ClCompile Include="CoMSA.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

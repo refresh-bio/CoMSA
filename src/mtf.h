@@ -1,16 +1,17 @@
 #pragma once
 // *******************************************************************************************
-// This file is a part of MSAC software distributed under GNU GPL 3 licence.
-// The homepage of the MSAC project is http://sun.aei.polsl.pl/msac
+// This file is a part of CoMSA software distributed under GNU GPL 3 licence.
+// The homepage of the CoMSA project is http://sun.aei.polsl.pl/REFRESH/CoMSA
 //
-// Author: Sebastian Deorowicz
-// Version: 1.0
-// Date   : 2017-12-27
+// Author : Sebastian Deorowicz
+// Version: 1.1
+// Date   : 2018-04-12
 // *******************************************************************************************
 
 #include <vector>
 #include <algorithm>
 #include "ss.h"
+#include "defs.h"
 
 using namespace std;
 
@@ -43,7 +44,7 @@ public:
 	void Reset();
 	void ResetCounts(uint32_t vec_size);
 	void InitSymbol(int x);
-	void InitSymbols(vector<int> &v_legal_symbols);
+	void InitSymbols(const vector<int> &v_legal_symbols);
 	void Insert(int x);
 	int GetValue(int x);
 	int GetSymbol(int x);
@@ -58,7 +59,8 @@ class CMTF : public CSecondStage
 {
 	CRegisteringPriorityQueue<string> *in;
 	CRegisteringPriorityQueue<string> *out;
-	bool forward_mode;
+//	bool forward_mode;
+	stage_mode_t stage_mode;
 
 	CMTFCore *mtf_core;
 	vector<int> v_legal_symbols;
@@ -67,10 +69,11 @@ class CMTF : public CSecondStage
 
 	void forward();
 	void reverse();
+	void direct_copy();
 
 public:
-	CMTF(CRegisteringPriorityQueue<string> *_in, CRegisteringPriorityQueue<string> *_out, bool _forward_mode) :
-		in(_in), out(_out), forward_mode(_forward_mode)
+	CMTF(CRegisteringPriorityQueue<string> *_in, CRegisteringPriorityQueue<string> *_out, stage_mode_t _stage_mode) :
+		in(_in), out(_out), stage_mode(_stage_mode)
 	{
 		if (!in || !out)
 			throw "No I/O queues";

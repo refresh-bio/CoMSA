@@ -1,43 +1,43 @@
-all: msac
+all: CoMSA
 
-MSAC_ROOT_DIR = .
-MSAC_MAIN_DIR = src
-MSAC_LIBS_DIR = src/libs
+CoMSA_ROOT_DIR = .
+CoMSA_MAIN_DIR = src
+CoMSA_LIBS_DIR = src/libs
 
 CC 	= g++
-CFLAGS	= -Wall -O3 -m64 -std=c++14 -pthread -I $(MSAC_LIBS_DIR)
+CFLAGS	= -Wall -O3 -m64 -std=c++14 -pthread -I $(CoMSA_LIBS_DIR)
 CLINK	= -Wall -O3 -m64 -static -Wl,--whole-archive -lpthread -Wl,--no-whole-archive -std=c++14
 
 .cpp.o:
 	$(CC) $(CFLAGS) -c $< -o $@
 
-msac: $(MSAC_MAIN_DIR)/MSAC.o \
-	$(MSAC_MAIN_DIR)/entropy.o \
-	$(MSAC_MAIN_DIR)/fasta_file.o \
-	$(MSAC_MAIN_DIR)/lzma_wrapper.o \
-	$(MSAC_MAIN_DIR)/msa.o \
-	$(MSAC_MAIN_DIR)/pbwt.o \
-	$(MSAC_MAIN_DIR)/queue.o \
-	$(MSAC_MAIN_DIR)/rle.o \
-	$(MSAC_MAIN_DIR)/stockholm.o \
-	$(MSAC_MAIN_DIR)/transpose.o \
-	$(MSAC_MAIN_DIR)/mtf.o \
-	$(MSAC_MAIN_DIR)/wfc.o
-	$(CC) $(CLINK) -o $(MSAC_ROOT_DIR)/$@  \
-	$(MSAC_MAIN_DIR)/MSAC.o \
-	$(MSAC_MAIN_DIR)/entropy.o \
-	$(MSAC_MAIN_DIR)/fasta_file.o \
-	$(MSAC_MAIN_DIR)/lzma_wrapper.o \
-	$(MSAC_MAIN_DIR)/msa.o \
-	$(MSAC_MAIN_DIR)/pbwt.o \
-	$(MSAC_MAIN_DIR)/queue.o \
-	$(MSAC_MAIN_DIR)/rle.o \
-	$(MSAC_MAIN_DIR)/stockholm.o \
-	$(MSAC_MAIN_DIR)/transpose.o \
-	$(MSAC_MAIN_DIR)/mtf.o \
-	$(MSAC_MAIN_DIR)/wfc.o \
-	$(MSAC_LIBS_DIR)/liblzma.a
+CoMSA: $(CoMSA_MAIN_DIR)/CoMSA.o \
+	$(CoMSA_MAIN_DIR)/entropy.o \
+	$(CoMSA_MAIN_DIR)/fasta_file.o \
+	$(CoMSA_MAIN_DIR)/lzma_wrapper.o \
+	$(CoMSA_MAIN_DIR)/msa.o \
+	$(CoMSA_MAIN_DIR)/pbwt.o \
+	$(CoMSA_MAIN_DIR)/queue.o \
+	$(CoMSA_MAIN_DIR)/rle.o \
+	$(CoMSA_MAIN_DIR)/stockholm.o \
+	$(CoMSA_MAIN_DIR)/transpose.o \
+	$(CoMSA_MAIN_DIR)/mtf.o \
+	$(CoMSA_MAIN_DIR)/wfc.o
+	$(CC) $(CLINK) -o $(CoMSA_ROOT_DIR)/$@  \
+	$(CoMSA_MAIN_DIR)/CoMSA.o \
+	$(CoMSA_MAIN_DIR)/entropy.o \
+	$(CoMSA_MAIN_DIR)/fasta_file.o \
+	$(CoMSA_MAIN_DIR)/lzma_wrapper.o \
+	$(CoMSA_MAIN_DIR)/msa.o \
+	$(CoMSA_MAIN_DIR)/pbwt.o \
+	$(CoMSA_MAIN_DIR)/queue.o \
+	$(CoMSA_MAIN_DIR)/rle.o \
+	$(CoMSA_MAIN_DIR)/stockholm.o \
+	$(CoMSA_MAIN_DIR)/transpose.o \
+	$(CoMSA_MAIN_DIR)/mtf.o \
+	$(CoMSA_MAIN_DIR)/wfc.o \
+	$(CoMSA_LIBS_DIR)/liblzma.a
 clean:
-	-rm $(MSAC_MAIN_DIR)/*.o
-	-rm msac
+	-rm $(CoMSA_MAIN_DIR)/*.o
+	-rm CoMSA
 	

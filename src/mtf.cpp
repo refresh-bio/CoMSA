@@ -1,10 +1,10 @@
 // *******************************************************************************************
-// This file is a part of MSAC software distributed under GNU GPL 3 licence.
-// The homepage of the MSAC project is http://sun.aei.polsl.pl/msac
+// This file is a part of CoMSA software distributed under GNU GPL 3 licence.
+// The homepage of the CoMSA project is http://sun.aei.polsl.pl/REFRESH/CoMSA
 //
-// Author: Sebastian Deorowicz
-// Version: 1.0
-// Date   : 2017-12-27
+// Author : Sebastian Deorowicz
+// Version: 1.1
+// Date   : 2018-04-12
 // *******************************************************************************************
 
 #include <iostream>
@@ -58,7 +58,7 @@ void CMTFCore::InitSymbol(int x)
 
 // *******************************************************************************************
 // Insert vector of legal symbols
-void CMTFCore::InitSymbols(vector<int> &v_legal_symbols)
+void CMTFCore::InitSymbols(const vector<int> &v_legal_symbols)
 {
 	v.clear();
 	for (auto c : v_legal_symbols)
@@ -153,7 +153,6 @@ inline int CMTFCore::Size()
 // 
 // *******************************************************************************************
 
-
 // *******************************************************************************************
 // Do MTF coding
 void CMTF::forward()
@@ -183,6 +182,24 @@ void CMTF::forward()
 		}
 
 		out->Push(priority, dest);
+	}
+
+	out->MarkCompleted();
+}
+
+// *******************************************************************************************
+// Direct copy - just for debugging
+void CMTF::direct_copy()
+{
+	string src;
+	uint64_t priority;
+
+	while (!in->IsCompleted())
+	{
+		if (!in->Pop(priority, src))
+			continue;
+
+		out->Push(priority, src);
 	}
 
 	out->MarkCompleted();
@@ -245,10 +262,12 @@ void CMTF::operator()()
 		if (count(v_legal_symbols.begin(), v_legal_symbols.end(), i) == 0)
 			v_legal_symbols.push_back(i);
 
-	if (forward_mode)
+	if (stage_mode == stage_mode_t::forward)
 		forward();
-	else
+	else if(stage_mode == stage_mode_t::reverse)
 		reverse();
+	else if (stage_mode == stage_mode_t::copy_forward && stage_mode == stage_mode_t::copy_reverse)
+		direct_copy();
 }
 
 // EOF

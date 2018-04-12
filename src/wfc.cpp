@@ -1,10 +1,10 @@
 // *******************************************************************************************
-// This file is a part of MSAC software distributed under GNU GPL 3 licence.
-// The homepage of the MSAC project is http://sun.aei.polsl.pl/msac
+// This file is a part of CoMSA software distributed under GNU GPL 3 licence.
+// The homepage of the CoMSA project is http://sun.aei.polsl.pl/REFRESH/CoMSA
 //
-// Author: Sebastian Deorowicz
-// Version: 1.0
-// Date   : 2017-12-27
+// Author : Sebastian Deorowicz
+// Version: 1.1
+// Date   : 2018-04-12
 // *******************************************************************************************
 
 #include <iostream>
@@ -94,7 +94,7 @@ void CWFCCore::disretize()
 
 		if (c_div != p_div)
 		{
-			v_updates.push_back(make_pair(x.first, round(max_div / c_div) - round(max_div / p_div)));
+			v_updates.push_back(make_pair(x.first, (int32_t) (round(max_div / c_div) - round(max_div / p_div))));
 			p_div = c_div;
 		}
 	}
@@ -332,6 +332,40 @@ void CWFC::forward()
 }
 
 // *******************************************************************************************
+// Forward direct copy - just for debugging purposes
+void CWFC::copy_forward()
+{
+	string src, dest;
+	uint64_t priority;
+
+	wfc_core->InitSymbols(v_legal_symbols);
+
+	while (!in->IsCompleted())
+	{
+		if (!in->Pop(priority, src))
+			continue;
+
+		wfc_core->ResetCounts((uint32_t)src.size());
+
+		dest.clear();
+		dest.resize(src.size());
+		uint32_t pos = 0;
+
+		for (auto c : src)
+		{
+			int x = wfc_core->GetValue(c);
+//			wfc_core->Insert(c);
+
+			dest[pos++] = x;
+		}
+
+		out->Push(priority, dest);
+	}
+
+	out->MarkCompleted();
+}
+
+// *******************************************************************************************
 // Perform reverse WFC
 void CWFC::reverse()
 {
@@ -340,14 +374,10 @@ void CWFC::reverse()
 
 	wfc_core->InitSymbols(v_legal_symbols);
 
-	int n_vec = 0;
-
 	while (!in->IsCompleted())
 	{
 		if (!in->Pop(priority, src))
 			continue;
-		
-		++n_vec;
 
 		wfc_core->ResetCounts((uint32_t) src.size());
 
@@ -359,6 +389,40 @@ void CWFC::reverse()
 		{
 			int c = wfc_core->GetSymbol(x);
 			wfc_core->Insert(c);
+
+			dest[pos++] = c;
+		}
+
+		out->Push(priority, dest);
+	}
+
+	out->MarkCompleted();
+}
+
+// *******************************************************************************************
+// Perform reverse direct copy - just for debug purposes
+void CWFC::copy_reverse()
+{
+	string src, dest;
+	uint64_t priority;
+
+	wfc_core->InitSymbols(v_legal_symbols);
+
+	while (!in->IsCompleted())
+	{
+		if (!in->Pop(priority, src))
+			continue;
+
+		wfc_core->ResetCounts((uint32_t)src.size());
+
+		dest.clear();
+		dest.resize(src.size());
+		uint32_t pos = 0;
+
+		for (auto x : src)
+		{
+			int c = wfc_core->GetSymbol(x);
+//			wfc_core->Insert(c);
 
 			dest[pos++] = c;
 		}
@@ -387,10 +451,14 @@ void CWFC::operator()()
 		if (count(v_legal_symbols.begin(), v_legal_symbols.end(), i) == 0)
 			v_legal_symbols.push_back(i);
 
-	if (forward_mode)
+	if (stage_mode == stage_mode_t::forward)
 		forward();
-	else
+	else if (stage_mode == stage_mode_t::reverse)
 		reverse();
+	else if (stage_mode == stage_mode_t::copy_forward)
+		copy_forward();
+	else if (stage_mode == stage_mode_t::copy_reverse)
+		copy_reverse();
 }
 
 // EOF

@@ -1,16 +1,18 @@
 #pragma once
 // *******************************************************************************************
-// This file is a part of MSAC software distributed under GNU GPL 3 licence.
-// The homepage of the MSAC project is http://sun.aei.polsl.pl/msac
+// This file is a part of CoMSA software distributed under GNU GPL 3 licence.
+// The homepage of the CoMSA project is http://sun.aei.polsl.pl/REFRESH/CoMSA
 //
-// Author: Sebastian Deorowicz
-// Version: 1.0
-// Date   : 2017-12-27
+// Author : Sebastian Deorowicz
+// Version: 1.1
+// Date   : 2018-04-12
 // *******************************************************************************************
 
 #include <vector>
 #include <cstdint>
 #include <cstring>
+#include <string>
+#include <vector>
 
 using namespace std;
 
@@ -21,6 +23,38 @@ using namespace std;
 #define my_fseek	_fseeki64
 #define my_ftell	_ftelli64
 #endif
+
+//#define EXPERIMENTAL_MODE
+
+const vector<uint8_t> GF_ID{ '#', '=', 'G', 'F', ' ', 'I', 'D' };
+const vector<uint8_t> GF_AC{ '#', '=', 'G', 'F', ' ', 'A', 'C' };
+
+enum class stage_mode_t {forward, reverse, copy_forward, copy_reverse};
+
+// *******************************************************************************************
+struct stockholm_family_desc_t {
+	size_t n_sequences;
+	size_t n_columns;
+	size_t raw_size;
+	size_t compressed_size;
+	size_t compressed_data_ptr;
+	string ID;
+	string AC;
+
+	stockholm_family_desc_t() : n_sequences(0), n_columns(0), raw_size(0), compressed_size(0), compressed_data_ptr(0)
+	{};
+
+	stockholm_family_desc_t(size_t _n_sequences, size_t _n_columns, size_t _raw_size, size_t _compressed_size,
+		size_t _compressed_data_ptr, string _ID, string _AC) :
+		n_sequences(_n_sequences),
+		n_columns(_n_columns),
+		raw_size(_raw_size),
+		compressed_size(_compressed_size),
+		compressed_data_ptr(_compressed_data_ptr),
+		ID(_ID),
+		AC(_AC)
+	{};
+};
 
 // *******************************************************************************************
 // Class for storage of range coder compressed data

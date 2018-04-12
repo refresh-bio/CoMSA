@@ -1,10 +1,10 @@
 // *******************************************************************************************
-// This file is a part of MSAC software distributed under GNU GPL 3 licence.
-// The homepage of the MSAC project is http://sun.aei.polsl.pl/msac
+// This file is a part of CoMSA software distributed under GNU GPL 3 licence.
+// The homepage of the CoMSA project is http://sun.aei.polsl.pl/REFRESH/CoMSA
 //
-// Author: Sebastian Deorowicz
-// Version: 1.0
-// Date   : 2017-12-27
+// Author : Sebastian Deorowicz
+// Version: 1.1
+// Date   : 2018-04-12
 // *******************************************************************************************
 
 #include "msa.h"
@@ -14,6 +14,14 @@
 //
 CMSACompress::CMSACompress()
 {
+	PBWT_fwd_mode = stage_mode_t::forward;
+	PBWT_rev_mode = stage_mode_t::reverse;
+
+	SS_fwd_mode = stage_mode_t::forward;
+	SS_rev_mode = stage_mode_t::reverse;
+
+	RLE0_fwd_mode = stage_mode_t::forward;
+	RLE0_rev_mode = stage_mode_t::reverse;
 }
 
 // *******************************************************************************************
@@ -21,6 +29,30 @@ CMSACompress::CMSACompress()
 CMSACompress::~CMSACompress()
 {
 }
+
+#ifdef EXPERIMENTAL_MODE
+// *******************************************************************************************
+void CMSACompress::SetCopyModes(bool PBWT_mode, bool SS_mode, bool RLE0_mode)
+{
+	if (PBWT_mode)
+	{
+		PBWT_fwd_mode = stage_mode_t::copy_forward;
+		PBWT_rev_mode = stage_mode_t::copy_reverse;
+	}
+
+	if (SS_mode)
+	{
+		SS_fwd_mode = stage_mode_t::copy_forward;
+		SS_rev_mode = stage_mode_t::copy_reverse;
+	}
+
+	if (RLE0_mode)
+	{
+		RLE0_fwd_mode = stage_mode_t::copy_forward;
+		RLE0_rev_mode = stage_mode_t::copy_reverse;
+	}
+}
+#endif
 
 // *******************************************************************************************
 // Compression of Stockholm files. 
@@ -270,7 +302,7 @@ bool CMSACompress::compress(vector<uint8_t> &v_text, vector<string> &v_sequences
 		thread *thr_transpose = new thread(std::ref(*transpose));
 
 		// PBWT
-		CPBWT *pbwt = new CPBWT(q_post_transpose, q_post_PBWT, true);
+		CPBWT *pbwt = new CPBWT(q_post_transpose, q_post_PBWT, PBWT_fwd_mode);
 		thread *thr_pbwt = new thread(std::ref(*pbwt));
 
 		vector<CSecondStage *> v_ss(n_thr_ss);
@@ -281,7 +313,7 @@ bool CMSACompress::compress(vector<uint8_t> &v_text, vector<string> &v_sequences
 			// MTF
 			for (int i = 0; i < n_thr_ss; ++i)
 			{
-				v_ss[i] = new CMTF(q_post_PBWT, q_post_SS, true);
+				v_ss[i] = new CMTF(q_post_PBWT, q_post_SS, SS_fwd_mode);
 				v_thr_ss[i] = new thread(std::ref(*(v_ss[i])));
 			}
 		}
@@ -290,13 +322,13 @@ bool CMSACompress::compress(vector<uint8_t> &v_text, vector<string> &v_sequences
 			// WFC
 			for (int i = 0; i < n_thr_ss; ++i)
 			{
-				v_ss[i] = new CWFC(q_post_PBWT, q_post_SS, true);
+				v_ss[i] = new CWFC(q_post_PBWT, q_post_SS, SS_fwd_mode);
 				v_thr_ss[i] = new thread(std::ref(*(v_ss[i])));
 			}
 		}
 
 		// RLE-0
-		CRLE *rle = new CRLE(q_post_SS, q_post_RLE, true);
+		CRLE *rle = new CRLE(q_post_SS, q_post_RLE, RLE0_fwd_mode);
 		thread *thr_rle = new thread(std::ref(*rle));
 
 		// Entropy
@@ -486,7 +518,7 @@ bool CMSACompress::decompress(vector<uint8_t> &v_text, vector<string> &v_sequenc
 		thread *thr_entropy = new thread(std::ref(*entropy));
 
 		// RLE-0
-		CRLE *rle = new CRLE(q_post_entropy, q_post_RLE, false);
+		CRLE *rle = new CRLE(q_post_entropy, q_post_RLE, RLE0_rev_mode);
 		thread *thr_rle = new thread(std::ref(*rle));
 
 		vector<CSecondStage *> v_ss(n_thr_ss);
@@ -497,7 +529,7 @@ bool CMSACompress::decompress(vector<uint8_t> &v_text, vector<string> &v_sequenc
 			// MTF
 			for (int i = 0; i < n_thr_ss; ++i)
 			{
-				v_ss[i] = new CMTF(q_post_RLE, q_post_SS, false);
+				v_ss[i] = new CMTF(q_post_RLE, q_post_SS, SS_rev_mode);
 				v_thr_ss[i] = new thread(std::ref(*(v_ss[i])));
 			}
 		}
@@ -506,13 +538,13 @@ bool CMSACompress::decompress(vector<uint8_t> &v_text, vector<string> &v_sequenc
 			// WFC
 			for (int i = 0; i < n_thr_ss; ++i)
 			{
-				v_ss[i] = new CWFC(q_post_RLE, q_post_SS, false);
+				v_ss[i] = new CWFC(q_post_RLE, q_post_SS, SS_rev_mode);
 				v_thr_ss[i] = new thread(std::ref(*(v_ss[i])));
 			}
 		}
 
 		// PBWT
-		CPBWT *pbwt = new CPBWT(q_post_SS, q_post_PBWT, false);
+		CPBWT *pbwt = new CPBWT(q_post_SS, q_post_PBWT, PBWT_rev_mode);
 		thread *thr_pbwt = new thread(std::ref(*pbwt));
 
 		// Transpose
