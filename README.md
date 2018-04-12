@@ -1,4 +1,4 @@
-# MSAC
+# CoMSA
 
 ## Installation and configuration
 
