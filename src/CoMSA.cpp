@@ -34,6 +34,7 @@ string extract_ID;
 string extract_AC;
 
 #ifdef EXPERIMENTAL_MODE
+bool Transpose_copy_mode = false;
 bool PBWT_copy_mode = false;
 bool SS_copy_mode = false;
 bool RLE0_copy_mode = false;
@@ -81,6 +82,7 @@ void usage()
 	cout << "   -eID <id>    - extract family of given id (only for 'Se' mode)\n";
 	cout << "   -eAC <ac>    - extract family of given accession number (only for 'Se' mode)\n";
 #ifdef EXPERIMENTAL_MODE
+	cout << "   -Tcm         - turn on no-transposition mode\n";
 	cout << "   -Pcm         - turn on PBWT copy mode\n";
 	cout << "   -Scm         - turn on MTF/WFC copy mode\n";
 	cout << "   -Rcm         - turn on RLE0 copy mode\n";
@@ -148,6 +150,11 @@ bool parse_params(int argc, char **argv)
 			arg_no += 2;
 		}
 #ifdef EXPERIMENTAL_MODE
+		else if (strcmp(argv[arg_no], "-Tcm") == 0)
+		{
+			Transpose_copy_mode = true;
+			++arg_no;
+		}
 		else if (strcmp(argv[arg_no], "-Pcm") == 0)
 		{
 			PBWT_copy_mode = true;
@@ -545,7 +552,7 @@ int main(int argc, char **argv)
 	msac = new CMSACompress();
 
 #ifdef EXPERIMENTAL_MODE
-	msac->SetCopyModes(PBWT_copy_mode, SS_copy_mode, RLE0_copy_mode);
+	msac->SetCopyModes(Transpose_copy_mode, PBWT_copy_mode, SS_copy_mode, RLE0_copy_mode);
 #endif
 
 	if (mode == task_mode_t::FASTA_compress)

@@ -36,6 +36,7 @@ class CMSACompress
 	size_t v_text_pos;
 
 	// Just for debug purposes
+	stage_mode_t Transpose_fwd_mode, Transpose_rev_mode;
 	stage_mode_t PBWT_fwd_mode, PBWT_rev_mode;
 	stage_mode_t SS_fwd_mode, SS_rev_mode;
 	stage_mode_t RLE0_fwd_mode, RLE0_rev_mode;
@@ -68,7 +69,7 @@ public:
 	~CMSACompress();
 
 #ifdef EXPERIMENTAL_MODE
-	void SetCopyModes(bool PBWT_mode, bool SS_mode, bool RLE0_mode);
+	void SetCopyModes(bool Transpose_copy_mode, bool PBWT_copy_mode, bool SS_copy_mode, bool RLE0_copy_mode);
 #endif
 
 	bool Compress(vector<string> &v_names, vector<string> &v_sequences, vector<uint8_t> &compressed_data, 

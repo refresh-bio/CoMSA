@@ -8,10 +8,8 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerWorkingDirectory>
-    </LocalDebuggerWorkingDirectory>
+    <LocalDebuggerWorkingDirectory>h:\msa_c1\pfam31\test</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>
-    </LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>Fd -Tcm aa.msac aa2.fa</LocalDebuggerCommandArguments>
   </PropertyGroup>
 </Project>

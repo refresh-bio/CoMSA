@@ -14,6 +14,9 @@
 //
 CMSACompress::CMSACompress()
 {
+	Transpose_fwd_mode = stage_mode_t::forward;
+	Transpose_rev_mode = stage_mode_t::reverse;
+
 	PBWT_fwd_mode = stage_mode_t::forward;
 	PBWT_rev_mode = stage_mode_t::reverse;
 
@@ -32,21 +35,27 @@ CMSACompress::~CMSACompress()
 
 #ifdef EXPERIMENTAL_MODE
 // *******************************************************************************************
-void CMSACompress::SetCopyModes(bool PBWT_mode, bool SS_mode, bool RLE0_mode)
+void CMSACompress::SetCopyModes(bool Transpose_copy_mode, bool PBWT_copy_mode, bool SS_copy_mode, bool RLE0_copy_mode)
 {
-	if (PBWT_mode)
+	if (Transpose_copy_mode)
+	{
+		Transpose_fwd_mode = stage_mode_t::copy_forward;
+		Transpose_rev_mode = stage_mode_t::copy_reverse;
+	}
+
+	if (PBWT_copy_mode)
 	{
 		PBWT_fwd_mode = stage_mode_t::copy_forward;
 		PBWT_rev_mode = stage_mode_t::copy_reverse;
 	}
 
-	if (SS_mode)
+	if (SS_copy_mode)
 	{
 		SS_fwd_mode = stage_mode_t::copy_forward;
 		SS_rev_mode = stage_mode_t::copy_reverse;
 	}
 
-	if (RLE0_mode)
+	if (RLE0_copy_mode)
 	{
 		RLE0_fwd_mode = stage_mode_t::copy_forward;
 		RLE0_rev_mode = stage_mode_t::copy_reverse;
@@ -298,7 +307,7 @@ bool CMSACompress::compress(vector<uint8_t> &v_text, vector<string> &v_sequences
 		CVectorIOStream *v_post_entropy = new CVectorIOStream(v_seq_compressed);
 
 		// Transpose
-		CTranspose *transpose = new CTranspose(q_pre_transpose, q_post_transpose, 0, 0, true);
+		CTranspose *transpose = new CTranspose(q_pre_transpose, q_post_transpose, 0, 0, Transpose_fwd_mode);
 		thread *thr_transpose = new thread(std::ref(*transpose));
 
 		// PBWT
@@ -514,7 +523,7 @@ bool CMSACompress::decompress(vector<uint8_t> &v_text, vector<string> &v_sequenc
 		CRegisteringPriorityQueue<vector<string> *> *q_post_transpose = new CRegisteringPriorityQueue<vector<string> *>(1);
 
 		// Entropy
-		CEntropy *entropy = new CEntropy(q_post_entropy, v_pre_entropy, pre_entropy_sequences_size, n_sequences, false, ctx_length);
+		CEntropy *entropy = new CEntropy(q_post_entropy, v_pre_entropy, pre_entropy_sequences_size, Transpose_fwd_mode == stage_mode_t::forward ? n_sequences : n_columns, false, ctx_length);
 		thread *thr_entropy = new thread(std::ref(*entropy));
 
 		// RLE-0
@@ -548,7 +557,7 @@ bool CMSACompress::decompress(vector<uint8_t> &v_text, vector<string> &v_sequenc
 		thread *thr_pbwt = new thread(std::ref(*pbwt));
 
 		// Transpose
-		CTranspose *transpose = new CTranspose(q_post_transpose, q_post_PBWT, n_sequences, n_columns, false);
+		CTranspose *transpose = new CTranspose(q_post_transpose, q_post_PBWT, n_sequences, n_columns, Transpose_rev_mode);
 		thread *thr_transpose = new thread(std::ref(*transpose));
 
 		thr_entropy->join();

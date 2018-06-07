@@ -109,13 +109,63 @@ void CTranspose::reverse()
 }
 
 // *******************************************************************************************
+// Perform no-transposition of a matrix
+void CTranspose::copy_forward()
+{
+	uint64_t priority = 0;
+	vector<string>* v_sequences = nullptr;
+	matrix->Pop(priority, v_sequences);
+
+	size_t in_n_columns = v_sequences->front().size();
+
+	// Check whether all sequences are of the same length
+	for (auto &x : *v_sequences)
+		if (x.size() != in_n_columns)
+		{
+			cerr << "Sequences are of different lengths\n";
+			exit(1);
+		}
+
+	for (auto &x : *v_sequences)
+		in_out->Push(priority++, x);
+
+	in_out->MarkCompleted();
+}
+
+// *******************************************************************************************
+// Perform no reverse transposition of a matrix
+void CTranspose::copy_reverse()
+{
+	string src;
+	uint64_t priority;
+	vector<string>* v_sequences = new vector<string>();
+
+	v_sequences->resize(n_sequences);
+
+	while (!in_out->IsCompleted())
+	{
+		if (!in_out->Pop(priority, src))
+			continue;
+
+		(*v_sequences)[priority] = move(src);
+	}
+
+	matrix->Push(0, v_sequences);
+	matrix->MarkCompleted();
+}
+
+// *******************************************************************************************
 // Do processing
 void CTranspose::operator()()
 {
-	if (forward_mode)
+	if (stage_mode == stage_mode_t::forward)
 		forward();
-	else
+	else if (stage_mode == stage_mode_t::reverse)
 		reverse();
+	else if (stage_mode == stage_mode_t::copy_forward)
+		copy_forward();
+	else if (stage_mode == stage_mode_t::copy_reverse)
+		copy_reverse();
 }
 
 // EOF
