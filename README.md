@@ -52,8 +52,7 @@ Decompresses `pf00005.26.fasta` file and wrap the protein data to 60 columns.
 
 ## Citing
 
-[Deorowicz, S., Walczyszyn, J., Debudaj-Grabysz, A., Gudyœ, A., Grabowski, S. (2017) MSAC: Compression of multiple sequence alignment files, bioRxiv]() 
-DOI:
+[Deorowicz, S., Walczyszyn, J., Debudaj-Grabysz (2017) MSAC: Compression of multiple sequence alignment files, bioRxiv: https://www.biorxiv.org/content/early/2017/12/28/240341]
 
 
  
