@@ -4,8 +4,8 @@
 // The homepage of the CoMSA project is http://sun.aei.polsl.pl/REFRESH/CoMSA
 //
 // Author : Sebastian Deorowicz
-// Version: 1.1
-// Date   : 2018-04-12
+// Version: 1.2
+// Date   : 2018-10-04
 // *******************************************************************************************
 
 #include <vector>
@@ -13,6 +13,7 @@
 #include <cstring>
 #include <string>
 #include <vector>
+#include "libs/zlib.h"
 
 using namespace std;
 
@@ -95,39 +96,56 @@ class CInFile
 	const int BUFFER_SIZE = 128 << 20;
 
 	FILE *f;
+	gzFile_s *gz_f;
 	char *buffer;
 	size_t buffer_pos;
 	size_t buffer_filled;
+	bool gz_used;
 
 	size_t file_size;
 	size_t before_buffer_bytes;
 
 public:
-	CInFile() : f(nullptr), buffer(nullptr)
+	CInFile() : f(nullptr), gz_f(nullptr), buffer(nullptr), gz_used(false)
 	{};
 
 	~CInFile()
 	{
 		if (f)
 			fclose(f);
+		if (gz_f)
+			gzclose(gz_f);
 		if (buffer)
 			delete[] buffer;
 	}
 
 	bool Open(string file_name)
 	{
-		if (f)
+		if (f || gz_f)
 			return false;
 
-		f = fopen(file_name.c_str(), "rb");
-		if (!f)
-			return false;
+		gz_used = (file_name.size() > 3 && file_name.substr(file_name.size() - 3, 3) == ".gz");
 
-		my_fseek(f, 0, SEEK_END);
-		file_size = my_ftell(f);
-		my_fseek(f, 0, SEEK_SET);
+		if (gz_used)
+		{
+			gz_f = gzopen(file_name.c_str(), "rb");
+			if (!gz_f)
+				return false;
+			file_size = 0;
+			gzbuffer(gz_f, 32 << 20);
+		}
+		else
+		{
+			f = fopen(file_name.c_str(), "rb");
+			if (!f)
+				return false;
+
+			my_fseek(f, 0, SEEK_END);
+			file_size = my_ftell(f);
+			my_fseek(f, 0, SEEK_SET);
+		}
+
 		before_buffer_bytes = 0;
-
 		buffer = new char[BUFFER_SIZE];
 		buffer_pos = 0;
 		buffer_filled = 0;
@@ -142,6 +160,13 @@ public:
 			fclose(f);
 			f = nullptr;
 		}
+
+		if (gz_f)
+		{
+			gzclose(gz_f);
+			gz_f = nullptr;
+		}
+
 		if (buffer)
 		{
 			delete[] buffer;
@@ -156,12 +181,24 @@ public:
 		if (buffer_pos < buffer_filled)
 			return buffer[buffer_pos++];
 
-		if (feof(f))
-			return EOF;
+		if (gz_used)
+		{
+			if (gzeof(gz_f))
+				return EOF;
+		}
+		else
+		{
+			if (feof(f))
+				return EOF;
+		}
 
 		before_buffer_bytes += buffer_pos;
 
-		buffer_filled = fread(buffer, 1, BUFFER_SIZE, f);
+		if(gz_used)
+			buffer_filled = gzread(gz_f, buffer, BUFFER_SIZE);
+		else
+			buffer_filled = fread(buffer, 1, BUFFER_SIZE, f);
+
 		if (buffer_filled == 0)
 			return EOF;
 
@@ -171,7 +208,10 @@ public:
 
 	bool Eof()
 	{
-		return (buffer_pos == buffer_filled) && feof(f);
+		if(gz_used)
+			return (buffer_pos == buffer_filled) && gzeof(gz_f);
+		else
+			return (buffer_pos == buffer_filled) && feof(f);
 	}
 
 	size_t FileSize()

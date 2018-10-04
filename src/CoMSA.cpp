@@ -3,8 +3,8 @@
 // The homepage of the CoMSA project is http://sun.aei.polsl.pl/REFRESH/CoMSA
 //
 // Author : Sebastian Deorowicz
-// Version: 1.1
-// Date   : 2018-04-12
+// Version: 1.2
+// Date   : 2018-10-04
 // *******************************************************************************************
 
 #include <iostream>
@@ -32,6 +32,7 @@ int wrap_width = 0;
 bool fast_variant = false;
 string extract_ID;
 string extract_AC;
+bool extract_sequences_only = false;
 
 #ifdef EXPERIMENTAL_MODE
 bool Transpose_copy_mode = false;
@@ -81,6 +82,7 @@ void usage()
 	cout << "   -f           - turn on fast variant (MTF in place of WFC)\n";
 	cout << "   -eID <id>    - extract family of given id (only for 'Se' mode)\n";
 	cout << "   -eAC <ac>    - extract family of given accession number (only for 'Se' mode)\n";
+	cout << "   -es          - extract sequences only (without gaps)\n";
 #ifdef EXPERIMENTAL_MODE
 	cout << "   -Tcm         - turn on no-transposition mode\n";
 	cout << "   -Pcm         - turn on PBWT copy mode\n";
@@ -134,9 +136,14 @@ bool parse_params(int argc, char **argv)
 			wrap_width = NORM(atoi(argv[arg_no + 1]), 0, 100000000);
 			arg_no += 2;
 		}
-		else if (strcmp(argv[arg_no], "-f") == 0 && arg_no + 2 < argc)
+		else if (strcmp(argv[arg_no], "-f") == 0 && arg_no + 1 < argc)
 		{
 			fast_variant = true;
+			arg_no++;
+		}
+		else if (strcmp(argv[arg_no], "-es") == 0 && arg_no + 1 < argc)
+		{
+			extract_sequences_only = true;
 			arg_no++;
 		}
 		else if (strcmp(argv[arg_no], "-eID") == 0 && mode == task_mode_t::Stockholm_extract && arg_no + 2 < argc)
@@ -265,7 +272,7 @@ bool FASTA_decompress()
 
 	msac->Decompress(v_compressed_data, v_names, v_sequences);
 
-	fasta.PutSequences(v_names, v_sequences, wrap_width);
+	fasta.PutSequences(v_names, v_sequences, wrap_width, extract_sequences_only);
 
 	if (!fasta.SaveFile(out_name))
 	{
@@ -419,7 +426,7 @@ bool Stockholm_decompress()
 			return false;
 		}
 
-		if (!sf.PutSequences(v_meta, v_offsets, v_names, v_sequences))
+		if (!sf.PutSequences(v_meta, v_offsets, v_names, v_sequences, wrap_width, extract_sequences_only))
 		{
 			cerr << "Fatal error during saving compressed data\n";
 			return false;
@@ -487,7 +494,7 @@ bool Stockholm_extract()
 			return false;
 		}
 
-		if (!sf.PutSequences(v_meta, v_offsets, v_names, v_sequences))
+		if (!sf.PutSequences(v_meta, v_offsets, v_names, v_sequences, wrap_width, extract_sequences_only))
 		{
 			cerr << "Fatal error during saving compressed data\n";
 			return false;

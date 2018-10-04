@@ -3,8 +3,8 @@
 // The homepage of the CoMSA project is http://sun.aei.polsl.pl/REFRESH/CoMSA
 //
 // Author : Sebastian Deorowicz
-// Version: 1.1
-// Date   : 2018-04-12
+// Version: 1.2
+// Date   : 2018-10-04
 // *******************************************************************************************
 
 #include <iostream>
@@ -83,6 +83,10 @@ bool CFastaFile::SaveFile(string file_name)
 		out->Write(v_names[i]);
 		out->Put('\n');
 
+		// remove any gaps if requested
+		if (store_sequences_only)
+			v_sequences[i].erase(remove_if(v_sequences[i].begin(), v_sequences[i].end(), [](char c) {return c < 'A' || c > 'z'; }), v_sequences[i].end());
+
 		if (wrap_width == 0)
 		{
 			out->Write(v_sequences[i]);
@@ -125,11 +129,12 @@ bool CFastaFile::GetSequences(vector<string> &_v_names, vector<string> &_v_seque
 
 // *******************************************************************************************
 // Pass sequences to store
-bool CFastaFile::PutSequences(vector<string> &_v_names, vector<string> &_v_sequences, int _wrap_width)
+bool CFastaFile::PutSequences(vector<string> &_v_names, vector<string> &_v_sequences, int _wrap_width, bool _store_sequences_only)
 {
 	v_names = std::move(_v_names);
 	v_sequences = std::move(_v_sequences);
 	wrap_width = _wrap_width;
+	store_sequences_only = _store_sequences_only;
 
 	return !v_sequences.empty();
 }

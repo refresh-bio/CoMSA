@@ -3,8 +3,8 @@
 // The homepage of the CoMSA project is http://sun.aei.polsl.pl/REFRESH/CoMSA
 //
 // Author : Sebastian Deorowicz
-// Version: 1.1
-// Date   : 2018-04-12
+// Version: 1.2
+// Date   : 2018-10-04
 // *******************************************************************************************
 
 // This code is based on the example from XZ library

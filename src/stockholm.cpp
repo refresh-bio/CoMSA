@@ -3,12 +3,14 @@
 // The homepage of the CoMSA project is http://sun.aei.polsl.pl/REFRESH/CoMSA
 //
 // Author : Sebastian Deorowicz
-// Version: 1.1
-// Date   : 2018-04-12
+// Version: 1.2
+// Date   : 2018-10-04
 // *******************************************************************************************
 
 #include "stockholm.h"
+#include <algorithm>
 #include <iostream>
+#include <unordered_map>
 #include "defs.h"
 
 using namespace std;
@@ -189,58 +191,145 @@ bool CStockholmFile::GetSequences(vector<vector<uint8_t>> &v_meta, vector<uint32
 
 // *******************************************************************************************
 // Put single file 
-bool CStockholmFile::PutSequences(vector<vector<uint8_t>> &v_meta, vector<uint32_t> &v_offsets, vector<string> &v_names, vector<string> &v_sequences)
+bool CStockholmFile::PutSequences(vector<vector<uint8_t>> &v_meta, vector<uint32_t> &v_offsets, vector<string> &v_names, vector<string> &v_sequences, 
+	int wrap_width, bool store_sequences_only)
 {
 	uint32_t no_leading_meta = (uint32_t) (v_meta.size() - v_offsets.size());
 	uint32_t i_meta, i_seq, i_offset;
 
 	const char *eof_marker = "//\n";
 
-	for (i_meta = 0; i_meta < no_leading_meta; ++i_meta)
+	string family_ID;
+	string family_AC;
+	unordered_map<string, string> m_seq_ac;
+
+	if (store_sequences_only)
 	{
-		out->Write((char*) (v_meta[i_meta].data()), v_meta[i_meta].size());
-		out->Put('\n');
+		// Store just sequences with names - no metadata
+		string s_ID("#=GF ID");
+		string s_AC("#=GF AC");
+		string s_GS("#=GS");
+		string s_pAC(" AC ");
+		string space(" ");
+
+		for (auto &x : v_meta)
+		{
+			if (equal(s_ID.begin(), s_ID.end(), x.begin()))
+				family_ID = string(find_end(x.begin(), x.end(), space.begin(), space.end())+1, x.end());
+			else if (equal(s_AC.begin(), s_AC.end(), x.begin()))
+				family_AC = string(find_end(x.begin(), x.end(), space.begin(), space.end())+1, x.end());
+			else if (equal(s_GS.begin(), s_GS.end(), x.begin()))
+			{
+				string name(x.begin() + 5, find(x.begin() + 5, x.end(), ' '));
+				auto p_AC = find_end(x.begin(), x.end(), s_pAC.begin(), s_pAC.end());
+				if (p_AC != x.end())
+				{
+					auto q = find(p_AC + 4, x.end(), ' ');
+					string protein_AC(p_AC + 4, q);
+
+					m_seq_ac.insert(make_pair(name, protein_AC));
+				}
+			}
+//			else if (regex_match(x.begin(), x.end(), mr, r_GS_AC))
+//				m_seq_ac[string(mr[1].first, mr[1].second)] = string(mr[3].first, mr[3].second);
+		}
+		
+		for (i_seq = 0; i_seq < v_sequences.size(); ++i_seq)
+		{
+			out->Put('>');
+			for (auto c : v_names[i_seq])
+				if (c == ' ')
+					break;
+				else
+					out->Put(c);
+			out->Put(' ');
+			auto p = m_seq_ac.find(string(v_names[i_seq].begin(), find(v_names[i_seq].begin(), v_names[i_seq].end(), ' ')));
+			if (p != m_seq_ac.end())
+			{
+				out->Write(p->second);
+				out->Put(' ');
+			}
+			out->Write(family_AC);
+			out->Put(';');
+			out->Write(family_ID);
+			out->Put(';');
+			out->Put('\n');
+
+			int seq_pos = 0;
+			int next_wrap_pos = wrap_width ? wrap_width : -1;
+			for (auto c : v_sequences[i_seq])
+			{
+				if (c >= 'A' && c <= 'Z')
+				{
+					if (seq_pos++ == next_wrap_pos)
+					{
+						out->Put('\n');
+						next_wrap_pos += wrap_width;
+					}
+					out->Put(c);
+				}
+				else if (c >= 'a' && c <= 'z')
+				{
+					if (seq_pos++ == next_wrap_pos)
+					{
+						out->Put('\n');
+						next_wrap_pos += wrap_width;
+					}
+					out->Put(c - 32);
+				}
+			}
+			out->Put('\n');
+		}
 	}
-
-	uint32_t cur_offset = ~(0u);
-	i_offset = 0;
-
-	if (!v_offsets.empty())
-		cur_offset = v_offsets[i_offset++];
-
-	for (i_seq = 0; i_seq < v_sequences.size(); ++i_seq)
+	else
 	{
+		// Store in regular Stockholm file
+		for (i_meta = 0; i_meta < no_leading_meta; ++i_meta)
+		{
+			out->Write((char*)(v_meta[i_meta].data()), v_meta[i_meta].size());
+			out->Put('\n');
+		}
+
+		uint32_t cur_offset = ~(0u);
+		i_offset = 0;
+
+		if (!v_offsets.empty())
+			cur_offset = v_offsets[i_offset++];
+
+		for (i_seq = 0; i_seq < v_sequences.size(); ++i_seq)
+		{
+			while (cur_offset == 0)
+			{
+				out->Write((char*)(v_meta[i_meta].data()), v_meta[i_meta].size());
+				out->Put('\n');
+				i_meta++;
+
+				if (i_offset < v_offsets.size())
+					cur_offset = v_offsets[i_offset++];
+				else
+					cur_offset = ~(0u);
+			}
+
+			out->Write((char*)(v_names[i_seq].data()), v_names[i_seq].size());
+			out->Write((char*)(v_sequences[i_seq].data()), v_sequences[i_seq].size());
+			out->Put('\n');
+			--cur_offset;
+		}
+
 		while (cur_offset == 0)
 		{
 			out->Write((char*)(v_meta[i_meta].data()), v_meta[i_meta].size());
 			out->Put('\n');
 			i_meta++;
-			
+
 			if (i_offset < v_offsets.size())
 				cur_offset = v_offsets[i_offset++];
 			else
 				cur_offset = ~(0u);
 		}
 
-		out->Write((char*) (v_names[i_seq].data()), v_names[i_seq].size());
-		out->Write((char*)(v_sequences[i_seq].data()), v_sequences[i_seq].size());
-		out->Put('\n');
-		--cur_offset;
+		out->Write(eof_marker, 3);
 	}
-
-	while (cur_offset == 0)
-	{
-		out->Write((char*)(v_meta[i_meta].data()), v_meta[i_meta].size());
-		out->Put('\n');
-		i_meta++;
-
-		if (i_offset < v_offsets.size())
-			cur_offset = v_offsets[i_offset++];
-		else
-			cur_offset = ~(0u);
-	}
-
-	out->Write(eof_marker, 3);
 
 	return true;
 }

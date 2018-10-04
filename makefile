@@ -36,7 +36,8 @@ CoMSA: $(CoMSA_MAIN_DIR)/CoMSA.o \
 	$(CoMSA_MAIN_DIR)/transpose.o \
 	$(CoMSA_MAIN_DIR)/mtf.o \
 	$(CoMSA_MAIN_DIR)/wfc.o \
-	$(CoMSA_LIBS_DIR)/liblzma.a
+	$(CoMSA_LIBS_DIR)/liblzma.a \
+	$(CoMSA_LIBS_DIR)/libz.a
 clean:
 	-rm $(CoMSA_MAIN_DIR)/*.o
 	-rm CoMSA

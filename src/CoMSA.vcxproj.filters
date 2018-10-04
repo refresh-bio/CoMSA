@@ -87,9 +87,16 @@
     <ClInclude Include="ss.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="libs\zconf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\zlib.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Library Include="libs\Release\liblzma.lib" />
+    <Library Include="libs\Release\zlibstat.lib" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
