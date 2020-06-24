@@ -1,5 +1,7 @@
 # CoMSA
 
+[![GitHub downloads](https://img.shields.io/github/downloads/refresh-bio/comsa/total.svg?style=flag&label=GitHub%20downloads)](https://github.com/refresh-bio/CoMSA/releases)
+
 ## Installation and configuration
 
 CoMSA comes with a set of precompiled binaries for Windows and Linux. They can be found under *Releases* tab.
