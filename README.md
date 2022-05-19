@@ -2,6 +2,9 @@
 
 [![GitHub downloads](https://img.shields.io/github/downloads/refresh-bio/comsa/total.svg?style=flag&label=GitHub%20downloads)](https://github.com/refresh-bio/CoMSA/releases)
 
+Compressor of Multiple Sequence Alignments (CoMSA) is a tool to represent a family of aligned protein sequences (or a collection of families) in a highly compressed form. As an input it takes the FASTA (single aligned family) of Stockholm (collection of families) files.
+Pfam v. 31.0 Stockholm file of size 41.6 GB can be compressed to as 1.74 GB (compare to 5.6 GB for gzip). CoMSA is also significantly faster in compression than gzip. More details can be found in our paper pointed below.
+
 ## Installation and configuration
 
 CoMSA comes with a set of precompiled binaries for Windows and Linux. They can be found under *Releases* tab.
