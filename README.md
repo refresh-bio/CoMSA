@@ -58,5 +58,5 @@ Decompresses `pf00005.26.fasta` file and wrap the protein data to 60 columns.
 
 ## Citing
 
-[Deorowicz, S., Walczyszyn, J., Debudaj-Grabysz (2018) CoMSA: Compression of multiple sequence alignment files, Bioinformatics (2018), doi: 10.1093/bioinformatics/bty619 ]
+<a href="https://doi.org/10.1093/bioinformatics/bty619">Deorowicz, S., Walczyszyn, J., Debudaj-Grabysz (2018) CoMSA: Compression of multiple sequence alignment files, Bioinformatics 35, 227&ndash;234 (2018), doi: 10.1093/bioinformatics/bty619</a>
 
